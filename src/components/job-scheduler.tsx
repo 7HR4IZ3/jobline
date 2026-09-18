@@ -114,7 +114,7 @@ export function JobScheduler() {
 
   const hasFilters = Boolean(query || statusFilter !== "all" || paymentFilter !== "all");
   const displayJobs = visibleJobs.filter((job) => {
-    if (scope === "archive" || view === "agenda") return true;
+    if (view === "agenda") return true;
     if (view === "month") return job.date.startsWith(format(currentDate, "yyyy-MM"));
     if (view === "day") return job.date === format(currentDate, "yyyy-MM-dd");
     const start = addDays(currentDate, -currentDate.getDay());
@@ -208,17 +208,17 @@ export function JobScheduler() {
           {hasFilters && <button className="clear-filters" onClick={() => { setQuery(""); setStatusFilter("all"); setPaymentFilter("all"); }}>Clear filters</button>}
         </div>}
         <div className="compact-date-row">
-          <div className="compact-title"><h1>{scope === "archive" ? "Completed jobs" : view === "agenda" ? "All scheduled jobs" : displayDateRange(currentDate, view)}</h1>{scope === "active" && view === "day" && <p>{format(currentDate, "EEEE")}</p>}</div>
-          {scope === "active" && view !== "agenda" && <div className="compact-navigation">
+          <div className="compact-title"><h1>{view === "agenda" ? (scope === "archive" ? "Completed jobs" : "All scheduled jobs") : displayDateRange(currentDate, view)}</h1>{scope === "archive" ? <p>Completed jobs</p> : view === "day" && <p>{format(currentDate, "EEEE")}</p>}</div>
+          {view !== "agenda" && <div className="compact-navigation">
             <button type="button" className="icon-button" onClick={() => changeDate(-1)} aria-label="Previous period"><ArrowLeft size={18} /></button>
             <button type="button" className="today-button" onClick={() => setCurrentDate(new Date())}>Today</button>
             <button type="button" className="icon-button" onClick={() => changeDate(1)} aria-label="Next period"><ArrowRight size={18} /></button>
           </div>}
         </div>
-        {scope === "active" && <div className="compact-viewbar">
+        <div className="compact-viewbar">
           <label className="view-select"><CalendarDays size={19} /><select aria-label="Calendar view" value={view} onChange={(event) => setView(event.target.value as CalendarView)}>{(["month", "week", "day", "agenda"] as CalendarView[]).map(option => <option key={option} value={option}>{option[0].toUpperCase() + option.slice(1)}</option>)}</select><ChevronDown size={16} /></label>
           <div className="compact-actions">
-            {displayJobs.length > 0 && <button className="primary-button" onClick={() => openNewJob()}><Plus size={17} /> Add job</button>}
+            {scope === "active" && displayJobs.length > 0 && <button className="primary-button" onClick={() => openNewJob()}><Plus size={17} /> Add job</button>}
             <div className="zoom-pair"><button type="button" onClick={() => changeZoom(-1)} disabled={view === "month" || view === "agenda"} aria-label="Zoom out"><Minus size={19} /></button><button type="button" onClick={() => changeZoom(1)} disabled={view === "day" || view === "agenda"} aria-label="Zoom in"><Plus size={19} /></button></div>
           </div>
         </div>}
@@ -226,7 +226,7 @@ export function JobScheduler() {
           <CalendarDays size={36} strokeWidth={1.6} />
           <p>{hasFilters ? "No matching jobs" : scope === "archive" ? "No completed jobs" : "No jobs scheduled"}</p>
           {hasFilters ? <button className="quiet-button" onClick={() => { setQuery(""); setStatusFilter("all"); setPaymentFilter("all"); }}>Clear filters</button> : scope === "active" && <button className="primary-button" onClick={() => openNewJob()}><Plus size={20} /> Add job</button>}
-        </div> : <CalendarShell jobs={visibleJobs} currentDate={currentDate} view={scope === "archive" ? "agenda" : view} onSelectJob={openJob} onSelectDate={openNewJob} onReschedule={(jobId, date) => void rescheduleJob(jobId, date)} />}
+        </div> : <CalendarShell jobs={displayJobs} currentDate={currentDate} view={view} onSelectJob={openJob} onSelectDate={scope === "active" ? openNewJob : () => undefined} onReschedule={(jobId, date) => void rescheduleJob(jobId, date)} />}
       </section>
       <footer className="storage-status" role="status">
         {loadError ? <><span className="status-dot offline" />Storage not connected<button onClick={() => void loadJobs(true)} disabled={isRefreshing}>{isRefreshing ? "Retrying…" : "Retry"}</button></> : (isLoading || isRefreshing) ? <><LoaderCircle size={12} className="spin" />Syncing…</> : <><span className="status-dot" />Up to date</>}

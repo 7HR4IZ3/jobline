@@ -221,7 +221,7 @@ export function JobScheduler() {
             {scope === "active" && displayJobs.length > 0 && <button className="primary-button" onClick={() => openNewJob()}><Plus size={17} /> Add job</button>}
             <div className="zoom-pair"><button type="button" onClick={() => changeZoom(-1)} disabled={view === "month" || view === "agenda"} aria-label="Zoom out"><Minus size={19} /></button><button type="button" onClick={() => changeZoom(1)} disabled={view === "day" || view === "agenda"} aria-label="Zoom in"><Plus size={19} /></button></div>
           </div>
-        </div>}
+        </div>
         {isLoading ? <div className="compact-empty" role="status"><LoaderCircle className="spin" size={24} /><p>Loading jobs…</p></div> : displayJobs.length === 0 ? <div className="compact-empty">
           <CalendarDays size={36} strokeWidth={1.6} />
           <p>{hasFilters ? "No matching jobs" : scope === "archive" ? "No completed jobs" : "No jobs scheduled"}</p>
